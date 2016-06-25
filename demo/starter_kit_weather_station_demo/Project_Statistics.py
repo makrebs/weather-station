@@ -380,3 +380,15 @@ class ProjectStatistics(QWidget):
                 self.temperatureQueue.pop()
 
         self.UpdateSwitch()
+        self.LogToFile()
+
+
+    def LogToFile(self):
+        date_str = time.strftime("%Y%m%d")
+        time_str = time.strftime("%H%M%S")
+        file_str = "%s weather.txt" % (date_str)
+
+        my_file = open(file_str, "a")
+        text = "%s %f %f %f %f\n" % (time_str, self.latestIlluminance, self.latestHumidity, self.latestAirPressure, self.latestTemperature)
+        my_file.write(text)
+        my_file.close()
