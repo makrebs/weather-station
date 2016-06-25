@@ -112,6 +112,11 @@ class WeatherStation(QApplication):
         timer.timeout.connect(self.connect)
         timer.start(1)
 
+        self.lcd_timer = QTimer(self)
+        self.lcd_timer.timeout.connect(self.mute_lcd)
+        self.lcd_timer.start(10000)
+
+
     def exit_demo(self, signl=None, frme=None):
         try:
             self.ipcon.disconnect()
@@ -124,7 +129,7 @@ class WeatherStation(QApplication):
 
     def open_gui(self):
         self.main = MainWindow(self)
-        self.main.setFixedSize(730, 430)
+        self.main.setFixedSize(930, 530)
         self.main.setWindowIcon(QIcon(load_pixmap('starter_kit_weather_station_demo-icon.png')))
         
         self.tabs = QTabWidget()
@@ -147,6 +152,7 @@ class WeatherStation(QApplication):
         self.active_project = self.projects[0]
 
         self.tabs.currentChanged.connect(self.tabChangedSlot)
+        self.tabs.setCurrentIndex(1)
 
         self.main.setWindowTitle("Starter Kit: Weather Station Demo " + DEMO_VERSION)
         self.main.show()
@@ -222,8 +228,15 @@ class WeatherStation(QApplication):
             self.lcd.set_custom_character(i, c[i]);
 
     def cb_button_pressed(self, button):
-        for p in self.projects:
-            p.button_pressed(button)
+        if self.lcd.is_backlight_on(): 
+            for p in self.projects:
+                p.button_pressed(button)
+        else:
+            self.lcd.backlight_on()
+            self.lcd_timer.start()
+
+    def mute_lcd(self):
+        self.lcd.backlight_off()
 
     def cb_enumerate(self, uid, connected_uid, position, hardware_version,
                      firmware_version, device_identifier, enumeration_type):
@@ -236,7 +249,6 @@ class WeatherStation(QApplication):
                     self.lcd.backlight_on()
                     self.lcd.register_callback(self.lcd.CALLBACK_BUTTON_PRESSED, self.cb_button_pressed)
                     self.configure_custom_chars()
-
                 except Error as e:
                     self.error_msg.showMessage('LCD 20x4 init failed: ' + str(e.description))
                     self.lcd = None

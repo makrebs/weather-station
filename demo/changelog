@@ -14,3 +14,7 @@
 2015-08-07: 1.0.4 (4b760a3)
 - Fix formatting of illuminance values from Ambient Light Bricklet 2.0
 - Add missing division by 100 for temperature values
+
+2016-06-25:
+- Set statistics as default tab
+- Turn off lcd backlight after 10 sec
